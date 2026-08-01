@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
@@ -18,6 +20,14 @@ public abstract class TeleOp_base extends NextFTCOpMode {
     private final MotorEx frontRightMotor = new MotorEx("rightFront").brakeMode();
     private final MotorEx backLeftMotor = new MotorEx("leftRear").reversed().brakeMode();
     private final MotorEx backRightMotor = new MotorEx("rightRear").brakeMode();
+
+    DigitalChannel limitSwitch;
+
+    @Override
+    public void onInit() {
+        limitSwitch = hardwareMap.get(DigitalChannel.class, "limitSwitch");
+        limitSwitch.setMode(DigitalChannel.Mode.INPUT);
+    }
     @Override
     public void onStartButtonPressed() {
         DriverControlledCommand driverControlled = new MecanumDriverControlled(
@@ -29,5 +39,14 @@ public abstract class TeleOp_base extends NextFTCOpMode {
                 Gamepads.gamepad1().leftStickX(),
                 Gamepads.gamepad1().rightStickX());  // Scalar to reduce turn power
         driverControlled.schedule();
+    }
+    @Override
+    public void onUpdate() {
+        if (!limitSwitch.getState()) {
+            telemetry.addData("Limit Switch", "PRESSED");
+        } else {
+            telemetry.addData("Limit Switch", "NOT PRESSED");
+        }
+        telemetry.update();
     }
 }
