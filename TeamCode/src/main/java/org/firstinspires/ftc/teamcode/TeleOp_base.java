@@ -21,12 +21,24 @@ public abstract class TeleOp_base extends NextFTCOpMode {
     private final MotorEx backLeftMotor = new MotorEx("leftRear").reversed().brakeMode();
     private final MotorEx backRightMotor = new MotorEx("rightRear").brakeMode();
 
-    DigitalChannel limitSwitch;
+    private DigitalChannel limitSwitch;
+    private DigitalChannel led01_Red;
+    private DigitalChannel led02_Green;
 
     @Override
     public void onInit() {
         limitSwitch = hardwareMap.get(DigitalChannel.class, "limitSwitch");
         limitSwitch.setMode(DigitalChannel.Mode.INPUT);
+        led01_Red = hardwareMap.get(DigitalChannel.class, "led01");
+        led02_Green = hardwareMap.get(DigitalChannel.class, "led02");
+
+        // Set direction to OUTPUT so the Control Hub sends voltage OUT
+        led01_Red.setMode(DigitalChannel.Mode.OUTPUT);
+        led02_Green.setMode(DigitalChannel.Mode.OUTPUT);
+
+        // Initial state: Off
+        led01_Red.setState(false);
+        led02_Green.setState(false);
     }
     @Override
     public void onStartButtonPressed() {
@@ -42,11 +54,21 @@ public abstract class TeleOp_base extends NextFTCOpMode {
     }
     @Override
     public void onUpdate() {
+        if (gamepad1.a) {
+            led01_Red.setState(true);  // ON
+        } else if (gamepad1.b) {
+            led02_Green.setState(true);   // ON
+        } else {
+            led01_Red.setState(false); // OFF
+            led02_Green.setState(false);    // OFF
+        }
+
         if (!limitSwitch.getState()) {
             telemetry.addData("Limit Switch", "PRESSED");
         } else {
             telemetry.addData("Limit Switch", "NOT PRESSED");
         }
+
         telemetry.update();
     }
 }
